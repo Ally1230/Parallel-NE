@@ -3,6 +3,8 @@
 #include <set>
 #include <Eigen/Dense>
 #include <cmath>
+#include "data_example.cpp"
+#include <ctime> // C-style clock
 
 using namespace std;
 using namespace Eigen;
@@ -32,28 +34,18 @@ void generateSubsets(const vector<int> &set, vector<vector<int>> &subsets) {
 }
 
 int main() {
-    // Read data 
-    int m, n;
-    cout << "Enter the number of strategies for Player 1: ";
-    cin >> m;
-    cout << "Enter the number of strategies for Player 2: ";
-    cin >> n;
+    // Read data
+    int n = 5;
+    int m = 5;
+    auto [A, B] = example_55();
 
-    cout << "Enter the payoff matrix for Player 1 (" << m << "x" << n << "):\n";
-    MatrixXd A(m, n);
-    for (int i = 0; i < m; ++i)
-        for (int j = 0; j < n; ++j)
-            cin >> A(i, j);
-
-    cout << "Enter the payoff matrix for Player 2 (" << m << "x" << n << "):\n";
-    MatrixXd B(m, n);
-    for (int i = 0; i < m; ++i)
-        for (int j = 0; j < n; ++j)
-            cin >> B(i, j);
+    clock_t start = clock();
 
     vector<int> strategies_p1(m), strategies_p2(n);
-    for (int i = 0; i < m; ++i) strategies_p1[i] = i;
-    for (int j = 0; j < n; ++j) strategies_p2[j] = j;
+    for (int i = 0; i < m; ++i)
+        strategies_p1[i] = i;
+    for (int j = 0; j < n; ++j)
+        strategies_p2[j] = j;
 
     // generate all non-empty subsets of strategies
     vector<vector<int>> supports_p1, supports_p2;
@@ -169,6 +161,8 @@ int main() {
             }
         }
     }
+    // End timer
+    clock_t end = clock();
 
     cout << "\nNash Equilibria found:\n";
     int eq_count = 0;
@@ -184,6 +178,11 @@ int main() {
 
     if (eq_count == 0)
         cout << "No Nash Equilibria found.\n";
+
+
+    // Calculate execution time in seconds
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Execution Time: " << duration << " seconds" << std::endl;
 
     return 0;
 }

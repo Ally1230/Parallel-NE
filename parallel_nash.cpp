@@ -3,6 +3,8 @@
 #include <set>
 #include <Eigen/Dense>
 #include <cmath>
+#include "data_example.cpp"
+#include <ctime> // C-style clock
 
 using namespace std;
 using namespace Eigen;
@@ -44,26 +46,33 @@ vector<vector<int>> generateSubsets(const vector<int> &set)
     return subsets;
 }
 
+
+//     int m, n;
+//     cout << "Enter the number of strategies for Player 1: ";
+//     cin >> m;
+//     cout << "Enter the number of strategies for Player 2: ";
+//     cin >> n;
+
+//     cout << "Enter the payoff matrix for Player 1 (" << m << "x" << n << "):\n";
+//     MatrixXd A(m, n);
+//     for (int i = 0; i < m; ++i)
+//         for (int j = 0; j < n; ++j)
+//             cin >> A(i, j);
+
+//     cout << "Enter the payoff matrix for Player 2 (" << m << "x" << n << "):\n";
+//     MatrixXd B(m, n);
+//     for (int i = 0; i < m; ++i)
+//         for (int j = 0; j < n; ++j)
+//             cin >> B(i, j);
+
 int main()
 {
     // Read data
-    int m, n;
-    cout << "Enter the number of strategies for Player 1: ";
-    cin >> m;
-    cout << "Enter the number of strategies for Player 2: ";
-    cin >> n;
+    int n = 5;
+    int m = 5;
+    auto [A, B] = example_55();
 
-    cout << "Enter the payoff matrix for Player 1 (" << m << "x" << n << "):\n";
-    MatrixXd A(m, n);
-    for (int i = 0; i < m; ++i)
-        for (int j = 0; j < n; ++j)
-            cin >> A(i, j);
-
-    cout << "Enter the payoff matrix for Player 2 (" << m << "x" << n << "):\n";
-    MatrixXd B(m, n);
-    for (int i = 0; i < m; ++i)
-        for (int j = 0; j < n; ++j)
-            cin >> B(i, j);
+    clock_t start = clock();
 
     vector<int> strategies_p1(m), strategies_p2(n);
     for (int i = 0; i < m; ++i)
@@ -220,6 +229,9 @@ int main()
         }
     }
 
+    // End timer
+    clock_t end = clock();
+
     // Print result
     cout << "\nNash Equilibria found:\n";
     int eq_count = 0;
@@ -238,6 +250,10 @@ int main()
 
     if (eq_count == 0)
         cout << "No Nash Equilibria found.\n";
+
+    // Calculate execution time in seconds
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Execution Time: " << duration << " seconds" << std::endl;
 
     return 0;
 }
