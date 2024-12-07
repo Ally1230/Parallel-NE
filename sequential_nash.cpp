@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include "data_example.cpp"
-#include <ctime> // C-style clock
+#include <chrono>
 
 using namespace std;
 using namespace Eigen;
@@ -35,11 +35,11 @@ void generateSubsets(const vector<int> &set, vector<vector<int>> &subsets) {
 
 int main() {
     // Read data
-    int n = 5;
-    int m = 5;
-    auto [A, B] = example_55();
+    int n = 10;
+    int m = 10;
+    auto [A, B] = example_1010();
 
-    clock_t start = clock();
+    const auto start = std::chrono::steady_clock::now();
 
     vector<int> strategies_p1(m), strategies_p2(n);
     for (int i = 0; i < m; ++i)
@@ -162,7 +162,7 @@ int main() {
         }
     }
     // End timer
-    clock_t end = clock();
+    const auto end = std::chrono::steady_clock::now();
 
     cout << "\nNash Equilibria found:\n";
     int eq_count = 0;
@@ -181,7 +181,7 @@ int main() {
 
 
     // Calculate execution time in seconds
-    double duration = double(end - start) / CLOCKS_PER_SEC;
+    const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
     std::cout << "Execution Time: " << duration << " seconds" << std::endl;
 
     return 0;
