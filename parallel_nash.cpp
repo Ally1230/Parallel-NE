@@ -5,6 +5,7 @@
 #include <cmath>
 #include "data_example.cpp"
 #include <chrono>
+#include <unistd.h>
 
 using namespace std;
 using namespace Eigen;
@@ -46,6 +47,45 @@ vector<vector<int>> generateSubsets(const vector<int> &set)
     return subsets;
 }
 
+vector<pair<vector<int>, vector<int>>> generateSubsetsDouble(const vector<int> &setA, const vector<int> &setB)
+{
+    int n = (int)setA.size();
+    int m = (int)setB.size();
+    vector<pair<vector<int>, vector<int>>> subset_pairs;
+
+    // first generate all subsets of setA
+    int subset_countA = 1 << n;
+    vector<vector<int>> subsets(subset_countA);
+    for (int i = 1; i < subset_countA; ++i)
+    {
+        vector<int> subset;
+        for (int j = 0; j < n; ++j)
+        {
+            if (i & (1 << j))
+                subset.push_back(setA[j]);
+        }
+        subsets[i] = subset;
+    }
+
+    // create pairs of subsets of setA and setB
+    int subset_countB = 1 << m;
+    for (int i = 1; i < subset_countB; ++i)
+    {
+        vector<int> subset;
+        for (int j = 0; j < m; ++j)
+        {
+            if (i & (1 << j))
+                subset.push_back(setB[j]);
+        }
+
+        for (int k = 0; k < subset_countA; ++k)
+        {
+            subset_pairs.push_back(make_pair(subsets[k], subset));
+        }
+    }
+
+    return subset_pairs;
+}
 
 //     int m, n;
 //     cout << "Enter the number of strategies for Player 1: ";
@@ -65,16 +105,32 @@ vector<vector<int>> generateSubsets(const vector<int> &set)
 //         for (int j = 0; j < n; ++j)
 //             cin >> B(i, j);
 
-int main(){
+
+int main(int argc, char *argv[]){
+    int num_threads = 1;
+
+    // Read command line arguments
+    int opt;
+    while ((opt = getopt(argc, argv, "p:")) != -1) {
+        switch (opt) {
+            case 'p':
+                num_threads = atoi(optarg);
+                break;
+            default:
+                cout << "flag not supported!";
+                exit(EXIT_FAILURE);
+        }
+    }
+    cout << "number of process: " << num_threads << "\n";
+
 
     // Set Number of Threads
-    int num_threads = 1;
     omp_set_num_threads(num_threads);
 
     // Read data
-    int n = 3;
-    int m = 3;
-    auto [A, B] = example_33();
+    int n = 20;
+    int m = 2;
+    auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();
 
@@ -86,20 +142,31 @@ int main(){
 
     // generate all non-empty subsets of strategies
     vector<vector<int>> supports_p1, supports_p2;
-    supports_p1 = generateSubsets(strategies_p1);
-    supports_p2 = generateSubsets(strategies_p2);
+
+    // supports_p1 = generateSubsets(strategies_p1);
+    // supports_p2 = generateSubsets(strategies_p2);
+
+    auto support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
+
+    cout << "length of support_pairs:" << support_pairs.size() << "\n";
 
     // equilibria initialized
     set<pair<vector<double>, vector<double>>> equilibria;
 
+    const auto init = std::chrono::steady_clock::now();
+    const double init_duration = std::chrono::duration_cast<std::chrono::duration<double>>(init - start).count();
+    std::cout << "Initialization Time: " << init_duration << " seconds" << std::endl;
 
     #pragma omp parallel
     {
         std::vector<std::pair<std::vector<double>, std::vector<double>>> local_equilibria;
-        #pragma omp for nowait
-        for (const auto &support_p1 : supports_p1)
-        {
-            for (const auto &support_p2 : supports_p2)
+        #pragma omp for schedule(dynamic)
+        for (auto [support_p1, support_p2] : support_pairs)
+        {        
+        // for (const auto &support_p1 : supports_p1)
+        // {
+        //     #pragma omp for schedule(static)
+        //     for (const auto &support_p2 : supports_p2)
             {
                 int k = (int)support_p1.size();
                 int l = (int)support_p2.size();
@@ -108,8 +175,10 @@ int main(){
 
                 // Build submatrices
                 MatrixXd A_p1(k, l), B_p2(k, l);
+                // #pragma omp for schedule(static)
                 for (int i = 0; i < k; ++i)
                 {
+                    // #pragma omp for schedule(static)
                     for (int j = 0; j < l; ++j)
                     {
                         A_p1(i, j) = A(support_p1[i], support_p2[j]);
@@ -237,11 +306,11 @@ int main(){
     const auto end = std::chrono::steady_clock::now();
 
     // Print result
-    cout << "\nNash Equilibria found:\n";
+    cout << "Nash Equilibria found:\n";
     int eq_count = 0;
     for (const auto &eq : equilibria)
     {
-        cout << "\nEquilibrium " << ++eq_count << ":\n";
+        cout << "Equilibrium " << ++eq_count << ":\n";
         cout << "Player 1 strategy: [ ";
         for (double prob : eq.first)
             cout << prob << " ";

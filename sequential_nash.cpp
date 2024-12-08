@@ -35,8 +35,8 @@ void generateSubsets(const vector<int> &set, vector<vector<int>> &subsets) {
 
 int main() {
     // Read data
-    int n = 10;
-    int m = 10;
+    int n = 3;
+    int m = 2;
     auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();

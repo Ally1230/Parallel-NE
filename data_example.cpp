@@ -6,22 +6,24 @@ using namespace std;
 using namespace Eigen;
 
 pair<MatrixXd, MatrixXd> example_random(int m, int n){
+    srand(42);
+
     Eigen::MatrixXd payoff1 = Eigen::MatrixXd::Random(m, n);
     Eigen::MatrixXd payoff2 = Eigen::MatrixXd::Random(m, n);
 
-    std::cout << "Player 1 Payoff Matrix:\n";
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            std::cout << payoff1(i,j) << (j == n-1 ? '\n' : ' ');
-        }
-    }
+    // std::cout << "Player 1 Payoff Matrix:\n";
+    // for (int i = 0; i < m; ++i) {
+    //     for (int j = 0; j < n; ++j) {
+    //         std::cout << payoff1(i,j) << (j == n-1 ? '\n' : ' ');
+    //     }
+    // }
 
-    std::cout << "\nPlayer 2 Payoff Matrix:\n";
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            std::cout << payoff2(i,j) << (j == n-1 ? '\n' : ' ');
-        }
-    }
+    // std::cout << "\nPlayer 2 Payoff Matrix:\n";
+    // for (int i = 0; i < m; ++i) {
+    //     for (int j = 0; j < n; ++j) {
+    //         std::cout << payoff2(i,j) << (j == n-1 ? '\n' : ' ');
+    //     }
+    // }
 
     return make_pair(payoff1, payoff2);
 }
