@@ -37,7 +37,7 @@ int main() {
     // Read data
     int n = 10;
     int m = 10;
-    auto [A, B] = example_1010();
+    auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();
 

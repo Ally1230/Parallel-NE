@@ -65,12 +65,16 @@ vector<vector<int>> generateSubsets(const vector<int> &set)
 //         for (int j = 0; j < n; ++j)
 //             cin >> B(i, j);
 
-int main()
-{
+int main(){
+
+    // Set Number of Threads
+    int num_threads = 1;
+    omp_set_num_threads(num_threads);
+
     // Read data
-    int n = 10;
-    int m = 10;
-    auto [A, B] = example_1010();
+    int n = 3;
+    int m = 3;
+    auto [A, B] = example_33();
 
     const auto start = std::chrono::steady_clock::now();
 

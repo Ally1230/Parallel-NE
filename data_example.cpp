@@ -5,6 +5,64 @@
 using namespace std;
 using namespace Eigen;
 
+pair<MatrixXd, MatrixXd> example_random(int m, int n){
+    Eigen::MatrixXd payoff1 = Eigen::MatrixXd::Random(m, n);
+    Eigen::MatrixXd payoff2 = Eigen::MatrixXd::Random(m, n);
+
+    std::cout << "Player 1 Payoff Matrix:\n";
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            std::cout << payoff1(i,j) << (j == n-1 ? '\n' : ' ');
+        }
+    }
+
+    std::cout << "\nPlayer 2 Payoff Matrix:\n";
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            std::cout << payoff2(i,j) << (j == n-1 ? '\n' : ' ');
+        }
+    }
+
+    return make_pair(payoff1, payoff2);
+}
+
+pair<MatrixXd, MatrixXd> example_33(){
+    const int N = 3;
+    MatrixXd payoff1(N, N);
+    MatrixXd payoff2(N, N);
+
+    // Populate the payoff matrices
+    // If i == j, payoff is 2; else 0.
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            if (i == j) {
+                payoff1(i,j) = 2;
+                payoff2(i,j) = 2;
+            } else {
+                payoff1(i,j) = 0;
+                payoff2(i,j) = 0;
+            }
+        }
+    }
+
+    std::cout << "Player 1 Payoff Matrix:\n";
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            std::cout << payoff1(i,j) << (j == N-1 ? '\n' : ' ');
+        }
+    }
+
+    std::cout << "\nPlayer 2 Payoff Matrix:\n";
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            std::cout << payoff2(i,j) << (j == N-1 ? '\n' : ' ');
+        }
+    }
+
+    // Nash equilibria are at (S_1,T_1), (S_2,T_2), (S_3,T_3).
+    return make_pair(payoff1, payoff2);
+}
+
 pair<MatrixXd, MatrixXd> example_1010(){
     const int N = 10;
     MatrixXd payoff1(N, N);
