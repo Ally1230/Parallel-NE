@@ -55,7 +55,7 @@ vector<pair<vector<int>, vector<int>>> generateSubsetsDouble(const vector<int> &
 
     // first generate all subsets of setA
     int subset_countA = 1 << n;
-    vector<vector<int>> subsets(subset_countA);
+    vector<vector<int>> subsets;
     for (int i = 1; i < subset_countA; ++i)
     {
         vector<int> subset;
@@ -64,12 +64,12 @@ vector<pair<vector<int>, vector<int>>> generateSubsetsDouble(const vector<int> &
             if (i & (1 << j))
                 subset.push_back(setA[j]);
         }
-        subsets[i] = subset;
+        subsets.push_back(subset);
     }
 
     // create pairs of subsets of setA and setB
     int subset_countB = 1 << m;
-    for (int i = 1; i < subset_countB; ++i)
+    for (int i = 0; i < subset_countB; ++i)
     {
         vector<int> subset;
         for (int j = 0; j < m; ++j)
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
     omp_set_num_threads(num_threads);
 
     // Read data
-    int n = 20;
+    int n = 18;
     int m = 2;
     auto [A, B] = example_random(m, n);
 
@@ -162,7 +162,8 @@ int main(int argc, char *argv[]){
         std::vector<std::pair<std::vector<double>, std::vector<double>>> local_equilibria;
         #pragma omp for schedule(dynamic)
         for (auto [support_p1, support_p2] : support_pairs)
-        {        
+        { 
+        //old code:       
         // for (const auto &support_p1 : supports_p1)
         // {
         //     #pragma omp for schedule(static)
@@ -175,10 +176,8 @@ int main(int argc, char *argv[]){
 
                 // Build submatrices
                 MatrixXd A_p1(k, l), B_p2(k, l);
-                // #pragma omp for schedule(static)
                 for (int i = 0; i < k; ++i)
                 {
-                    // #pragma omp for schedule(static)
                     for (int j = 0; j < l; ++j)
                     {
                         A_p1(i, j) = A(support_p1[i], support_p2[j]);
@@ -305,24 +304,24 @@ int main(int argc, char *argv[]){
     // End timer
     const auto end = std::chrono::steady_clock::now();
 
-    // Print result
-    cout << "Nash Equilibria found:\n";
-    int eq_count = 0;
-    for (const auto &eq : equilibria)
-    {
-        cout << "Equilibrium " << ++eq_count << ":\n";
-        cout << "Player 1 strategy: [ ";
-        for (double prob : eq.first)
-            cout << prob << " ";
-        cout << "]\n";
-        cout << "Player 2 strategy: [ ";
-        for (double prob : eq.second)
-            cout << prob << " ";
-        cout << "]\n";
-    }
+    // // Print result
+    // cout << "Nash Equilibria found:\n";
+    // int eq_count = 0;
+    // for (const auto &eq : equilibria)
+    // {
+    //     cout << "Equilibrium " << ++eq_count << ":\n";
+    //     cout << "Player 1 strategy: [ ";
+    //     for (double prob : eq.first)
+    //         cout << prob << " ";
+    //     cout << "]\n";
+    //     cout << "Player 2 strategy: [ ";
+    //     for (double prob : eq.second)
+    //         cout << prob << " ";
+    //     cout << "]\n";
+    // }
 
-    if (eq_count == 0)
-        cout << "No Nash Equilibria found.\n";
+    // if (eq_count == 0)
+        // cout << "No Nash Equilibria found.\n";
 
     // Calculate execution time in seconds
     const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
