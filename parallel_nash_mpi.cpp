@@ -45,6 +45,16 @@ vector<vector<int>> generateSubsets(const vector<int> &set)
     return subsets;
 }
 
+inline vector<int> generateSubset(const vector<int> &baseSet, int mask) {
+    vector<int> subset;
+    for (int j = 0; j < (int)baseSet.size(); ++j) {
+        if (mask & (1 << j)) {
+            subset.push_back(baseSet[j]);
+        }
+    }
+    return subset;
+}
+
 vector<pair<vector<int>, vector<int>>> generateSubsetsDouble(const vector<int> &setA, const vector<int> &setB)
 {
     int n = (int)setA.size();
@@ -111,101 +121,28 @@ int main(int argc, char *argv[])
     for (int j = 0; j < n; ++j)
         strategies_p2[j] = j;
 
-    // Master generates all support_pairs
-    vector<pair<vector<int>, vector<int>>> support_pairs;
-    if (rank == 0)
-    {
-        support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
-        cout << "Master generated support_pairs of size: " << support_pairs.size() << "\n";
+    // number of strategies for player 1 and player 2
+    int M = 1 << m; 
+    int N = 1 << n;
+
+    long long total_pairs = (long long)M * N;
+
+    if (rank == 0) {
+        cout << "Total subset pairs: " << total_pairs << "\n";
+        cout << "Distributing work among " << size << " processes.\n";
     }
 
-    // Broadcast the size of support_pairs
-    int support_size = 0;
-    if (rank == 0)
-        support_size = support_pairs.size();
-    MPI_Bcast(&support_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    // Broadcast the support_pairs data
-    if (rank != 0)
-        support_pairs.resize(support_size);
-
-    // To broadcast the data, we need to serialize it
-    // We'll first broadcast the size of each pair of subsets, then the elements
-    // First, prepare counts
-    vector<int> subset_sizes_a(support_size);
-    vector<int> subset_sizes_b(support_size);
-    vector<int> flat_subset_a;
-    vector<int> flat_subset_b;
-
-    if (rank == 0)
-    {
-        for (int i = 0; i < support_size; ++i)
-        {
-            subset_sizes_a[i] = support_pairs[i].first.size();
-            subset_sizes_b[i] = support_pairs[i].second.size();
-            flat_subset_a.insert(flat_subset_a.end(), support_pairs[i].first.begin(), support_pairs[i].first.end());
-            flat_subset_b.insert(flat_subset_b.end(), support_pairs[i].second.begin(), support_pairs[i].second.end());
-        }
-    }
-
-    // Broadcast subset_sizes_a and subset_sizes_b
-    MPI_Bcast(subset_sizes_a.data(), support_size, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(subset_sizes_b.data(), support_size, MPI_INT, 0, MPI_COMM_WORLD);
-
-    // Calculate total elements to receive
-    int total_a = 0, total_b = 0;
-    for (int i = 0; i < support_size; ++i)
-    {
-        total_a += subset_sizes_a[i];
-        total_b += subset_sizes_b[i];
-    }
-
-    if (rank != 0)
-    {
-        flat_subset_a.resize(total_a);
-        flat_subset_b.resize(total_b);
-    }
-
-    // Broadcast flat_subset_a and flat_subset_b
-    MPI_Bcast(flat_subset_a.data(), total_a, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(flat_subset_b.data(), total_b, MPI_INT, 0, MPI_COMM_WORLD);
-
-    // Reconstruct support_pairs
-    if (rank != 0)
-    {
-        int index_a = 0, index_b = 0;
-        for (int i = 0; i < support_size; ++i)
-        {
-            int size_a = subset_sizes_a[i];
-            int size_b = subset_sizes_b[i];
-            support_pairs[i].first.assign(flat_subset_a.begin() + index_a, flat_subset_a.begin() + index_a + size_a);
-            support_pairs[i].second.assign(flat_subset_b.begin() + index_b, flat_subset_b.begin() + index_b + size_b);
-            index_a += size_a;
-            index_b += size_b;
-        }
-    }
-
-    // Now, distribute the work among processes
-    // Each process will handle support_pairs starting from its rank and stepping by size
-    vector<pair<vector<int>, vector<int>>> local_support_pairs;
-    for (int i = rank; i < support_size; i += size)
-    {
-        local_support_pairs.emplace_back(support_pairs[i]);
-    }
-
-    if (rank == 0)
-    {
-        cout << "Distributing " << support_size << " support_pairs among " << size << " processes.\n";
-    }
 
     // Initialize local equilibria
     vector<pair<vector<double>, vector<double>>> local_equilibria;
 
-    // Start processing local_support_pairs
-    for (const auto &pair_support : local_support_pairs)
-    {
-        const vector<int> &support_p1 = pair_support.first;
-        const vector<int> &support_p2 = pair_support.second;
+    for (long long idx = rank; idx < total_pairs; idx += size) {
+        int subsetA_index = (int)(idx / N);
+        int subsetB_index = (int)(idx % N);
+
+        // Generate subsets for player 1 and player 2
+        vector<int> support_p1 = generateSubset(strategies_p1, subsetA_index);
+        vector<int> support_p2 = generateSubset(strategies_p2, subsetB_index);
 
         int k = (int)support_p1.size();
         int l = (int)support_p2.size();
@@ -403,24 +340,24 @@ int main(int argc, char *argv[])
         // End timer after gathering results
         auto end = std::chrono::steady_clock::now();
 
-        // // Print result
-        // cout << "Nash Equilibria found:\n";
-        // int eq_count = 0;
-        // for (const auto &eq : equilibria)
-        // {
-        //     cout << "Equilibrium " << ++eq_count << ":\n";
-        //     cout << "Player 1 strategy: [ ";
-        //     for (double prob : eq.first)
-        //         cout << prob << " ";
-        //     cout << "]\n";
-        //     cout << "Player 2 strategy: [ ";
-        //     for (double prob : eq.second)
-        //         cout << prob << " ";
-        //     cout << "]\n";
-        // }
+        // Print result
+        cout << "Nash Equilibria found:\n";
+        int eq_count = 0;
+        for (const auto &eq : equilibria)
+        {
+            cout << "Equilibrium " << ++eq_count << ":\n";
+            cout << "Player 1 strategy: [ ";
+            for (double prob : eq.first)
+                cout << prob << " ";
+            cout << "]\n";
+            cout << "Player 2 strategy: [ ";
+            for (double prob : eq.second)
+                cout << prob << " ";
+            cout << "]\n";
+        }
 
-        // if (eq_count == 0)
-            // cout << "No Nash Equilibria found.\n";
+        if (eq_count == 0)
+            cout << "No Nash Equilibria found.\n";
 
         // Calculate execution time in seconds
         const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();

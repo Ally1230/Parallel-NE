@@ -128,8 +128,8 @@ int main(int argc, char *argv[]){
     omp_set_num_threads(num_threads);
 
     // Read data
-    int n = 18;
-    int m = 2;
+    int n = 2;
+    int m = 18;
     auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();
@@ -304,24 +304,24 @@ int main(int argc, char *argv[]){
     // End timer
     const auto end = std::chrono::steady_clock::now();
 
-    // // Print result
-    // cout << "Nash Equilibria found:\n";
-    // int eq_count = 0;
-    // for (const auto &eq : equilibria)
-    // {
-    //     cout << "Equilibrium " << ++eq_count << ":\n";
-    //     cout << "Player 1 strategy: [ ";
-    //     for (double prob : eq.first)
-    //         cout << prob << " ";
-    //     cout << "]\n";
-    //     cout << "Player 2 strategy: [ ";
-    //     for (double prob : eq.second)
-    //         cout << prob << " ";
-    //     cout << "]\n";
-    // }
+    // Print result
+    cout << "Nash Equilibria found:\n";
+    int eq_count = 0;
+    for (const auto &eq : equilibria)
+    {
+        cout << "Equilibrium " << ++eq_count << ":\n";
+        cout << "Player 1 strategy: [ ";
+        for (double prob : eq.first)
+            cout << prob << " ";
+        cout << "]\n";
+        cout << "Player 2 strategy: [ ";
+        for (double prob : eq.second)
+            cout << prob << " ";
+        cout << "]\n";
+    }
 
-    // if (eq_count == 0)
-        // cout << "No Nash Equilibria found.\n";
+    if (eq_count == 0)
+        cout << "No Nash Equilibria found.\n";
 
     // Calculate execution time in seconds
     const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
