@@ -8,7 +8,7 @@ set -eux
 #     ./parallel_nash -p $thread;
 # done
 
-mpic++ parallel_nash_mpi.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
+mpic++ parallel_nash_mpi_worker.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
 
 # for thread in 1;
 for thread in 8 4 2 1;

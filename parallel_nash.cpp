@@ -128,8 +128,8 @@ int main(int argc, char *argv[]){
     omp_set_num_threads(num_threads);
 
     // Read data
-    int n = 2;
-    int m = 18;
+    int n = 18;
+    int m = 2;
     auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();
@@ -143,12 +143,10 @@ int main(int argc, char *argv[]){
     // generate all non-empty subsets of strategies
     vector<vector<int>> supports_p1, supports_p2;
 
-    // supports_p1 = generateSubsets(strategies_p1);
-    // supports_p2 = generateSubsets(strategies_p2);
+    supports_p1 = generateSubsets(strategies_p1);
+    supports_p2 = generateSubsets(strategies_p2);
 
-    auto support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
-
-    cout << "length of support_pairs:" << support_pairs.size() << "\n";
+    // auto support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
 
     // equilibria initialized
     set<pair<vector<double>, vector<double>>> equilibria;
@@ -161,13 +159,13 @@ int main(int argc, char *argv[]){
     {
         std::vector<std::pair<std::vector<double>, std::vector<double>>> local_equilibria;
         #pragma omp for schedule(dynamic)
-        for (auto [support_p1, support_p2] : support_pairs)
-        { 
+        // for (auto [support_p1, support_p2] : support_pairs)
+        // { 
         //old code:       
-        // for (const auto &support_p1 : supports_p1)
-        // {
-        //     #pragma omp for schedule(static)
-        //     for (const auto &support_p2 : supports_p2)
+        for (const auto &support_p1 : supports_p1)
+        {
+            // #pragma omp for schedule(static)
+            for (const auto &support_p2 : supports_p2)
             {
                 int k = (int)support_p1.size();
                 int l = (int)support_p2.size();

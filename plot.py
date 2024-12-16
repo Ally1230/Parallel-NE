@@ -16,7 +16,7 @@ plt.plot(nthread,total_time[0]/total_time, label = "2x18")
 # 5x15_OpenMP
 total_time = np.array([21.0126, 10.8311,  5.78805, 3.46685])
 init_time = np.array([0.465993 , 0.461292, 0.463605, 0.463605])
-plt.plot(nthread,total_time[0]/total_time, label = "5x15")
+# plt.plot(nthread,total_time[0]/total_time, label = "5x15")
 #5x15_MPI
 total_time = np.array([21.5535, 11.9045,  7.2029,  4.64817])
 total_time = np.array([21.4647, 12.7571, 7.6272, 4.6765])
