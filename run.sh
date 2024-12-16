@@ -1,17 +1,13 @@
-set -eux
+# set -eux
 
-# g++-11 parallel_nash.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
-
-# # for thread in 1;
-# for thread in 8 4 2 1;
+# mpic++ parallel_nash_mpi.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
+# for thread in 128 64 32 16 8 4 2 1;
 # do
-#     ./parallel_nash -p $thread;
+#     mpirun -np $thread ./parallel_nash
 # done
 
-mpic++ parallel_nash_mpi_worker.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
-
-# for thread in 1;
-for thread in 8 4 2 1;
+g++ parallel_nash.cpp -o parallel_nash -I eigen -std=c++14 -fopenmp
+for thread in 128 64 32 16 8 4 2 1;
 do
-    mpirun -np $thread ./parallel_nash
+    ./parallel_nash -p $thread;
 done

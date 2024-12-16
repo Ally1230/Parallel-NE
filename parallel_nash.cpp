@@ -121,15 +121,15 @@ int main(int argc, char *argv[]){
                 exit(EXIT_FAILURE);
         }
     }
-    cout << "number of process: " << num_threads << "\n";
+    // cout << "number of process: " << num_threads << "\n";
 
 
     // Set Number of Threads
     omp_set_num_threads(num_threads);
 
     // Read data
-    int n = 18;
-    int m = 2;
+    int n = 2;
+    int m = 18;
     auto [A, B] = example_random(m, n);
 
     const auto start = std::chrono::steady_clock::now();
@@ -141,31 +141,31 @@ int main(int argc, char *argv[]){
         strategies_p2[j] = j;
 
     // generate all non-empty subsets of strategies
-    vector<vector<int>> supports_p1, supports_p2;
+    // vector<vector<int>> supports_p1, supports_p2;
 
-    supports_p1 = generateSubsets(strategies_p1);
-    supports_p2 = generateSubsets(strategies_p2);
+    // supports_p1 = generateSubsets(strategies_p1);
+    // supports_p2 = generateSubsets(strategies_p2);
 
-    // auto support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
+    auto support_pairs = generateSubsetsDouble(strategies_p1, strategies_p2);
 
     // equilibria initialized
     set<pair<vector<double>, vector<double>>> equilibria;
 
     const auto init = std::chrono::steady_clock::now();
     const double init_duration = std::chrono::duration_cast<std::chrono::duration<double>>(init - start).count();
-    std::cout << "Initialization Time: " << init_duration << " seconds" << std::endl;
+    // std::cout << "Initialization Time: " << init_duration << " seconds" << std::endl;
 
     #pragma omp parallel
     {
         std::vector<std::pair<std::vector<double>, std::vector<double>>> local_equilibria;
         #pragma omp for schedule(dynamic)
-        // for (auto [support_p1, support_p2] : support_pairs)
-        // { 
+        for (auto [support_p1, support_p2] : support_pairs)
+        { 
         //old code:       
-        for (const auto &support_p1 : supports_p1)
-        {
-            // #pragma omp for schedule(static)
-            for (const auto &support_p2 : supports_p2)
+        // for (const auto &support_p1 : supports_p1)
+        // {
+        //     // #pragma omp for schedule(static)
+        //     for (const auto &support_p2 : supports_p2)
             {
                 int k = (int)support_p1.size();
                 int l = (int)support_p2.size();
@@ -303,27 +303,28 @@ int main(int argc, char *argv[]){
     const auto end = std::chrono::steady_clock::now();
 
     // Print result
-    cout << "Nash Equilibria found:\n";
-    int eq_count = 0;
-    for (const auto &eq : equilibria)
-    {
-        cout << "Equilibrium " << ++eq_count << ":\n";
-        cout << "Player 1 strategy: [ ";
-        for (double prob : eq.first)
-            cout << prob << " ";
-        cout << "]\n";
-        cout << "Player 2 strategy: [ ";
-        for (double prob : eq.second)
-            cout << prob << " ";
-        cout << "]\n";
-    }
+    // cout << "Nash Equilibria found:\n";
+    // int eq_count = 0;
+    // for (const auto &eq : equilibria)
+    // {
+    //     cout << "Equilibrium " << ++eq_count << ":\n";
+    //     cout << "Player 1 strategy: [ ";
+    //     for (double prob : eq.first)
+    //         cout << prob << " ";
+    //     cout << "]\n";
+    //     cout << "Player 2 strategy: [ ";
+    //     for (double prob : eq.second)
+    //         cout << prob << " ";
+    //     cout << "]\n";
+    // }
 
-    if (eq_count == 0)
-        cout << "No Nash Equilibria found.\n";
+    // if (eq_count == 0)
+    //     cout << "No Nash Equilibria found.\n";
 
     // Calculate execution time in seconds
     const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    std::cout << "Execution Time: " << duration << " seconds" << std::endl;
+    // std::cout << "Execution Time: " << duration << " seconds" << std::endl;
+    std::cout << duration << ", ";
 
     return 0;
 }

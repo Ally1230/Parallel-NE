@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
     auto start = std::chrono::steady_clock::now();
 
     // Read data
-    int n = 2;
-    int m = 18;
+    int n = 18;
+    int m = 2;
     MatrixXd A(m, n), B(m, n);
     // Assuming example_random generates two matrices A and B
     tie(A, B) = example_random(m, n);
@@ -127,10 +127,10 @@ int main(int argc, char *argv[])
 
     long long total_pairs = (long long)M * N;
 
-    if (rank == 0) {
-        cout << "Total subset pairs: " << total_pairs << "\n";
-        cout << "Distributing work among " << size << " processes.\n";
-    }
+    // if (rank == 0) {
+    //     cout << "Total subset pairs: " << total_pairs << "\n";
+    //     cout << "Distributing work among " << size << " processes.\n";
+    // }
 
 
     // Initialize local equilibria
@@ -341,27 +341,27 @@ int main(int argc, char *argv[])
         auto end = std::chrono::steady_clock::now();
 
         // Print result
-        cout << "Nash Equilibria found:\n";
-        int eq_count = 0;
-        for (const auto &eq : equilibria)
-        {
-            cout << "Equilibrium " << ++eq_count << ":\n";
-            cout << "Player 1 strategy: [ ";
-            for (double prob : eq.first)
-                cout << prob << " ";
-            cout << "]\n";
-            cout << "Player 2 strategy: [ ";
-            for (double prob : eq.second)
-                cout << prob << " ";
-            cout << "]\n";
-        }
+        // cout << "Nash Equilibria found:\n";
+        // int eq_count = 0;
+        // for (const auto &eq : equilibria)
+        // {
+        //     cout << "Equilibrium " << ++eq_count << ":\n";
+        //     cout << "Player 1 strategy: [ ";
+        //     for (double prob : eq.first)
+        //         cout << prob << " ";
+        //     cout << "]\n";
+        //     cout << "Player 2 strategy: [ ";
+        //     for (double prob : eq.second)
+        //         cout << prob << " ";
+        //     cout << "]\n";
+        // }
 
-        if (eq_count == 0)
-            cout << "No Nash Equilibria found.\n";
+        // if (eq_count == 0)
+        //     cout << "No Nash Equilibria found.\n";
 
         // Calculate execution time in seconds
         const double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-        std::cout << "Execution Time: " << duration << " seconds" << std::endl;
+        std::cout << duration << ", ";
     }
 
     // Finalize MPI

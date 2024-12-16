@@ -53,3 +53,9 @@ plt.xlabel("Number of Threads")
 plt.legend()
 plt.savefig("OpenMP_improved")
 # plt.show()
+
+
+
+
+
+
